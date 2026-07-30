@@ -7,6 +7,8 @@ class YouChatApplication : Application() {
     companion object {
         var context: Context? = null
         var mark: Int = 0
+        var correo: String? = null
+        var pass: String? = null
     }
     override fun onCreate() {
         super.onCreate()
