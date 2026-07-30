@@ -1,4 +1,4 @@
-package cu.alexgi.youchat.navigation
+package cu.youchat.app.navigation
 object Rutas {
     const val ONBOARDING = "onboarding"
     const val LOGIN = "login"

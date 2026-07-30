@@ -1,11 +1,11 @@
-package cu.alexgi.youchat.navigation
+package cu.youchat.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import cu.alexgi.youchat.YouChatApplication
-import cu.alexgi.youchat.ui.screens.*
+import cu.youchat.app.YouChatApplication
+import cu.youchat.app.ui.screens.*
 
 @Composable
 fun YouChatNavHost(navController: NavHostController) {

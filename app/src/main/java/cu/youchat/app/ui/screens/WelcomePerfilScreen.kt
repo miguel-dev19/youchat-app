@@ -1,4 +1,4 @@
-package cu.alexgi.youchat.ui.screens
+package cu.youchat.app.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import cu.alexgi.youchat.YouChatApplication
+import cu.youchat.app.YouChatApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

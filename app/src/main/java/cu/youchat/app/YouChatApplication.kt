@@ -1,4 +1,4 @@
-package cu.alexgi.youchat
+package cu.youchat.app
 
 import android.app.Application
 import android.content.Context

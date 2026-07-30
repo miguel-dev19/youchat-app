@@ -1,4 +1,4 @@
-package cu.alexgi.youchat
+package cu.youchat.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,7 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
-import cu.alexgi.youchat.navigation.YouChatNavHost
+import cu.youchat.app.navigation.YouChatNavHost
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

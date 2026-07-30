@@ -1,4 +1,4 @@
-package cu.alexgi.youchat.ui.screens
+package cu.youchat.app.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -32,8 +32,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
-import cu.alexgi.youchat.R
-import cu.alexgi.youchat.YouChatApplication
+import cu.youchat.app.R
+import cu.youchat.app.YouChatApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

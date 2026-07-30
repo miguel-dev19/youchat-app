@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "cu.alexgi.youchat"
+    namespace = "cu.youchat.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "cu.alexgi.youchat"
+        applicationId = "cu.youchat.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
