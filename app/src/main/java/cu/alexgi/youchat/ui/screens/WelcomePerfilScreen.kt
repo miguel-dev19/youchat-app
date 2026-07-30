@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import cu.alexgi.youchat.R
 import cu.alexgi.youchat.YouChatApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,47 +46,33 @@ import com.sun.mail.imap.IMAPStore
 fun WelcomePerfilScreen(onContinuar: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
     var alias by remember { mutableStateOf(YouChatApplication.alias ?: "") }
     var rutaImagenPerfil by remember { mutableStateOf(YouChatApplication.ruta_img_perfil ?: "") }
     var configSeleccionada by remember { mutableIntStateOf(2) }
-
-    // Copia de seguridad
     var verificandoBD by remember { mutableStateOf(false) }
     var hayCopiaSeguridad by remember { mutableStateOf<Boolean?>(null) }
     var rutaCopia by remember { mutableStateOf("") }
     var cargandoBD by remember { mutableStateOf(false) }
-
-    // Bandeja de entrada
     var textoBandeja by remember { mutableStateOf("Obteniendo cantidad de correos y peso total...") }
     var mostrarProgreso by remember { mutableStateOf(true) }
     var mostrarReintentar by remember { mutableStateOf(false) }
     var mostrarVaciar by remember { mutableStateOf(false) }
-
     val colorBtn = Color(0xFF3F51B5)
 
-    // Selector de imagen
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    val galleryLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             try {
                 val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-                val nombreImg = (YouChatApplication.correo ?: "user")
-                    .replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
+                val nombreImg = (YouChatApplication.correo ?: "user").replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
                 val miPath = YouChatApplication.RUTA_IMAGENES_PERFIL + nombreImg
-
                 File(YouChatApplication.RUTA_IMAGENES_PERFIL).mkdirs()
-                context.contentResolver.openInputStream(it)?.use { input ->
-                    FileOutputStream(File(miPath)).use { output -> input.copyTo(output) }
-                }
+                context.contentResolver.openInputStream(it)?.use { input -> FileOutputStream(File(miPath)).use { output -> input.copyTo(output) } }
                 rutaImagenPerfil = miPath
                 YouChatApplication.setRuta_img_perfil(miPath)
             } catch (_: Exception) {}
         }
     }
 
-    // Descripción según configuración
     val descripcion = when (configSeleccionada) {
         1 -> "Serán desactivadas todas las funciones que consuman datos de la aplicación.\nTodos estos ajustes pueden ser modificados luego."
         2 -> "Serán activadas sólo las funciones más importantes para el uso de la aplicación.\nTodos estos ajustes pueden ser modificados luego."
@@ -97,18 +82,13 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
 
     fun verificarCopiaSeguridad() {
         scope.launch {
-            verificandoBD = true
-            hayCopiaSeguridad = null
+            verificandoBD = true; hayCopiaSeguridad = null
             withContext(Dispatchers.IO) {
                 val sd = File(YouChatApplication.RUTA_COPIA_BASE_DATOS)
                 if (!sd.exists()) sd.mkdirs()
                 val backupDB = File(sd, "YouChat_BDatos.dbyc")
-                if (backupDB.exists()) {
-                    hayCopiaSeguridad = true
-                    rutaCopia = backupDB.absolutePath
-                } else {
-                    hayCopiaSeguridad = false
-                }
+                hayCopiaSeguridad = backupDB.exists()
+                if (backupDB.exists()) rutaCopia = backupDB.absolutePath
             }
             verificandoBD = false
         }
@@ -140,12 +120,8 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         scope.launch {
             mostrarVaciar = false; mostrarProgreso = true
             textoBandeja = "Vaciando bandeja, por favor espere..."
-            try {
-                withContext(Dispatchers.IO) { vaciarBandejaIMAP() }
-                textoBandeja = "Bandeja vaciada correctamente"
-            } catch (_: Exception) {
-                textoBandeja = "Error al vaciar la bandeja"
-            }
+            try { withContext(Dispatchers.IO) { vaciarBandejaIMAP() }; textoBandeja = "Bandeja vaciada correctamente" }
+            catch (_: Exception) { textoBandeja = "Error al vaciar la bandeja" }
             mostrarProgreso = false; mostrarReintentar = true; mostrarVaciar = false
         }
     }
@@ -153,47 +129,32 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
     LaunchedEffect(Unit) { verificarBandeja() }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Editar perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBtn, titleContentColor = Color.White)
-            )
-        },
+        topBar = { TopAppBar(title = { Text("Editar perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBtn, titleContentColor = Color.White)) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    YouChatApplication.setAlias(alias)
-                    when (configSeleccionada) { 1 -> YouChatApplication.configuracion1(); 2 -> YouChatApplication.configuracion2(); 3 -> YouChatApplication.configuracion3() }
-                    YouChatApplication.setMark(3)
-                    onContinuar()
-                },
-                containerColor = colorBtn
-            ) { Icon(Icons.Filled.Check, "Continuar", tint = Color.White) }
+            FloatingActionButton(onClick = {
+                YouChatApplication.setAlias(alias)
+                when (configSeleccionada) { 1 -> YouChatApplication.configuracion1(); 2 -> YouChatApplication.configuracion2(); 3 -> YouChatApplication.configuracion3() }
+                YouChatApplication.setMark(3); onContinuar()
+            }, containerColor = colorBtn) { Icon(Icons.Filled.Check, "Continuar", tint = Color.White) }
         }
     ) { padding ->
-        Column(
-            Modifier.fillMaxSize().background(Color.White).padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 75.dp)
-        ) {
+        Column(Modifier.fillMaxSize().background(Color.White).padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 75.dp)) {
             // Foto + alias
             Card(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), shape = RoundedCornerShape(8.dp)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)) {
                     Box(contentAlignment = Alignment.BottomEnd) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(context).data(if (rutaImagenPerfil.isNotEmpty()) rutaImagenPerfil else R.drawable.profile_white).crossfade(true).build(),
-                            contentDescription = "Foto",
-                            modifier = Modifier.size(140.dp).clip(CircleShape).border(2.dp, colorBtn, CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                        SmallFloatingActionButton(onClick = { galleryLauncher.launch("image/*") }, containerColor = colorBtn, modifier = Modifier.size(45.dp)) {
-                            Icon(Icons.Filled.CameraAlt, "Cambiar", tint = Color.White, modifier = Modifier.size(22.dp))
+                        if (rutaImagenPerfil.isNotEmpty()) {
+                            AsyncImage(model = ImageRequest.Builder(context).data(rutaImagenPerfil).crossfade(true).build(), contentDescription = "Foto", modifier = Modifier.size(140.dp).clip(CircleShape).border(2.dp, colorBtn, CircleShape), contentScale = ContentScale.Crop)
+                        } else {
+                            Icon(Icons.Filled.AccountCircle, "Foto", modifier = Modifier.size(140.dp).clip(CircleShape).border(2.dp, colorBtn, CircleShape), tint = Color.Gray)
                         }
+                        SmallFloatingActionButton(onClick = { galleryLauncher.launch("image/*") }, containerColor = colorBtn, modifier = Modifier.size(45.dp)) { Icon(Icons.Filled.CameraAlt, "Cambiar", tint = Color.White, modifier = Modifier.size(22.dp)) }
                     }
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(value = alias, onValueChange = { alias = it }, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), label = { Text("Alias") }, leadingIcon = { Icon(Icons.Filled.Badge, null) }, singleLine = true, shape = RoundedCornerShape(12.dp))
                 }
             }
-
-            // Configuración inicial
+            // Configuración
             Card(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), shape = RoundedCornerShape(8.dp)) {
                 Column(Modifier.padding(12.dp)) {
                     Text("Configuración inicial:", fontSize = 17.sp, fontWeight = FontWeight.Medium)
@@ -204,31 +165,18 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
                 }
             }
             Text(descripcion, fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp))
-
-            // Copia de seguridad
+            // Copia seguridad
             Card(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), shape = RoundedCornerShape(8.dp)) {
                 Column(Modifier.padding(12.dp)) {
                     Text("Copia de seguridad:", fontSize = 17.sp, fontWeight = FontWeight.Medium)
                     Spacer(Modifier.height(5.dp))
-                    Row(Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.Top) {
-                        Icon(Icons.Filled.Info, null, Modifier.size(20.dp), tint = Color.Gray)
-                        Spacer(Modifier.width(8.dp))
-                        Text(if (hayCopiaSeguridad == true) "Copia en: $rutaCopia" else if (hayCopiaSeguridad == false) "No existen copias de seguridad" else "Toque para verificar si existe alguna copia", fontSize = 15.sp, color = Color.Gray)
-                    }
+                    Row(Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.Top) { Icon(Icons.Filled.Info, null, Modifier.size(20.dp), tint = Color.Gray); Spacer(Modifier.width(8.dp)); Text(if (hayCopiaSeguridad == true) "Copia en: $rutaCopia" else if (hayCopiaSeguridad == false) "No existen copias" else "Toque Verificar para buscar", fontSize = 15.sp, color = Color.Gray) }
                     Spacer(Modifier.height(12.dp))
-                    Button(onClick = { verificarCopiaSeguridad() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), enabled = !verificandoBD, colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) {
-                        if (verificandoBD) { CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = Color.White); Spacer(Modifier.width(8.dp)) }
-                        Text("Verificar", color = Color.White)
-                    }
-                    AnimatedVisibility(visible = hayCopiaSeguridad == true) {
-                        Button(onClick = { /* cargar BD */ }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), enabled = !cargandoBD, colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) {
-                            Text("Cargar", color = Color.White)
-                        }
-                    }
+                    Button(onClick = { verificarCopiaSeguridad() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), enabled = !verificandoBD, colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { if (verificandoBD) { CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = Color.White); Spacer(Modifier.width(8.dp)) }; Text("Verificar", color = Color.White) }
+                    AnimatedVisibility(visible = hayCopiaSeguridad == true) { Button(onClick = {}, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), enabled = !cargandoBD, colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { Text("Cargar", color = Color.White) } }
                 }
             }
-
-            // Bandeja de entrada
+            // Bandeja
             Card(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp), shape = RoundedCornerShape(8.dp)) {
                 Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Bandeja de entrada:", fontSize = 17.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.Start))
@@ -237,12 +185,8 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
                     Spacer(Modifier.height(8.dp))
                     Text(textoBandeja, fontSize = 15.sp, textAlign = TextAlign.Center, color = Color.Gray, modifier = Modifier.padding(horizontal = 8.dp))
                     Spacer(Modifier.height(12.dp))
-                    AnimatedVisibility(visible = mostrarReintentar) {
-                        Button(onClick = { verificarBandeja() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { Text("Reintentar", color = Color.White) }
-                    }
-                    AnimatedVisibility(visible = mostrarVaciar) {
-                        Button(onClick = { vaciarBandeja() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { Text("Vaciar bandeja", color = Color.White) }
-                    }
+                    AnimatedVisibility(visible = mostrarReintentar) { Button(onClick = { verificarBandeja() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { Text("Reintentar", color = Color.White) } }
+                    AnimatedVisibility(visible = mostrarVaciar) { Button(onClick = { vaciarBandeja() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), colors = ButtonDefaults.buttonColors(containerColor = colorBtn), shape = RoundedCornerShape(8.dp)) { Text("Vaciar bandeja", color = Color.White) } }
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -252,34 +196,15 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
 
 @Composable
 private fun RadioButtonItem(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = seleccionado, onClick = onClick)
-        Spacer(Modifier.width(8.dp))
-        Text(texto, fontSize = 15.sp)
-    }
+    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = seleccionado, onClick = onClick); Spacer(Modifier.width(8.dp)); Text(texto, fontSize = 15.sp) }
 }
 
-// Funciones IMAP
 private suspend fun analizarBandeja(): Pair<Int, Long>? = withContext(Dispatchers.IO) {
     try {
         val props = Properties().apply { setProperty("mail.store.protocol", "imap"); setProperty("mail.imap.host", "imap.nauta.cu"); setProperty("mail.imap.port", "143") }
-        val session = Session.getDefaultInstance(props, object : Authenticator() {
-            override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass)
-        })
-        val store = session.getStore("imap") as IMAPStore
-        store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
-        if (store.isConnected) {
-            val inbox = store.getFolder("Inbox") as IMAPFolder
-            inbox.open(Folder.READ_WRITE)
-            if (inbox.isOpen) {
-                val messages = inbox.getMessages()
-                val cant = messages.size; var peso = 0L
-                for (msg in messages) peso += msg.size
-                inbox.close(false); store.close()
-                return@withContext Pair(cant, peso)
-            }
-            store.close()
-        }
+        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass) })
+        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
+        if (store.isConnected) { val inbox = store.getFolder("Inbox") as IMAPFolder; inbox.open(Folder.READ_WRITE); if (inbox.isOpen) { val messages = inbox.getMessages(); val cant = messages.size; var peso = 0L; for (msg in messages) peso += msg.size; inbox.close(false); store.close(); return@withContext Pair(cant, peso) }; store.close() }
     } catch (_: Exception) {}
     null
 }
@@ -287,24 +212,10 @@ private suspend fun analizarBandeja(): Pair<Int, Long>? = withContext(Dispatcher
 private suspend fun vaciarBandejaIMAP() = withContext(Dispatchers.IO) {
     try {
         val props = Properties().apply { setProperty("mail.store.protocol", "imap"); setProperty("mail.imap.host", "imap.nauta.cu"); setProperty("mail.imap.port", "143") }
-        val session = Session.getDefaultInstance(props, object : Authenticator() {
-            override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass)
-        })
-        val store = session.getStore("imap") as IMAPStore
-        store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
-        if (store.isConnected) {
-            val inbox = store.getFolder("Inbox") as IMAPFolder
-            inbox.open(Folder.READ_WRITE)
-            if (inbox.isOpen) {
-                for (msg in inbox.getMessages()) msg.setFlag(Flags.Flag.DELETED, true)
-                inbox.close(true); store.close()
-            }
-        }
+        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass) })
+        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
+        if (store.isConnected) { val inbox = store.getFolder("Inbox") as IMAPFolder; inbox.open(Folder.READ_WRITE); if (inbox.isOpen) { for (msg in inbox.getMessages()) msg.setFlag(Flags.Flag.DELETED, true); inbox.close(true); store.close() } }
     } catch (_: Exception) {}
 }
 
-private fun formatearBytes(bytes: Long): String = when {
-    bytes < 1024 -> "$bytes B"
-    bytes < 1024 * 1024 -> "%.1f KB".format(bytes / 1024.0)
-    else -> "%.1f MB".format(bytes / 1024.0 / 1024.0)
-}
+private fun formatearBytes(bytes: Long): String = when { bytes < 1024 -> "$bytes B"; bytes < 1024 * 1024 -> "%.1f KB".format(bytes / 1024.0); else -> "%.1f MB".format(bytes / 1024.0 / 1024.0) }
