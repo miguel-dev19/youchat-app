@@ -13,11 +13,14 @@ fun YouChatNavHost(navController: NavHostController) {
         navController = navController,
         startDestination = when (YouChatApplication.mark) {
             0 -> Rutas.ONBOARDING
-            else -> Rutas.LOGIN
+            1 -> Rutas.LOGIN
+            2 -> Rutas.WELCOME_PERFIL
+            else -> Rutas.ONBOARDING
         }
     ) {
         composable(Rutas.ONBOARDING) {
             OnboardingScreen(onFinalizar = {
+                YouChatApplication.mark = 1
                 navController.navigate(Rutas.LOGIN) {
                     popUpTo(Rutas.ONBOARDING) { inclusive = true }
                 }
@@ -25,8 +28,20 @@ fun YouChatNavHost(navController: NavHostController) {
         }
         composable(Rutas.LOGIN) {
             LoginScreen(onLoginExitoso = {
-                // Aquí irá WelcomePerfilScreen después
+                navController.navigate(Rutas.WELCOME_PERFIL) {
+                    popUpTo(Rutas.LOGIN) { inclusive = true }
+                }
             })
+        }
+        composable(Rutas.WELCOME_PERFIL) {
+            WelcomePerfilScreen(onContinuar = {
+                navController.navigate(Rutas.PRINCIPAL) {
+                    popUpTo(Rutas.WELCOME_PERFIL) { inclusive = true }
+                }
+            })
+        }
+        composable(Rutas.PRINCIPAL) {
+            // Placeholder - pantalla principal futura
         }
     }
 }
