@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,8 +35,7 @@ fun ViewYouPerfilScreen(
     onBack: () -> Unit = {},
     onNavigateToEditPerfil: (campo: String) -> Unit = {}
 ) {
-    val context = LocalContext.current
-
+    val ctx = LocalContext.current
     val alias = YouChatApplication.alias ?: ""
     val correo = YouChatApplication.correo ?: ""
     val info = YouChatApplication.info ?: ""
@@ -53,10 +51,10 @@ fun ViewYouPerfilScreen(
         uri?.let {
             try {
                 val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-                val nombreImg = (correo).replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
+                val nombreImg = correo.replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
                 val miPath = YouChatApplication.RUTA_IMAGENES_PERFIL + nombreImg
                 File(YouChatApplication.RUTA_IMAGENES_PERFIL).mkdirs()
-                context.contentResolver.openInputStream(it)?.use { input ->
+                ctx.contentResolver.openInputStream(it)?.use { input ->
                     FileOutputStream(File(miPath)).use { output -> input.copyTo(output) }
                 }
                 rutaPerfil = miPath
@@ -71,7 +69,7 @@ fun ViewYouPerfilScreen(
                 title = { Text("Perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás")
+                        Icon(Icons.Filled.ArrowBack, "Atrás")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -83,44 +81,28 @@ fun ViewYouPerfilScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .background(Color.White)
-                .padding(16.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).background(Color.White).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Foto de perfil
             Box(contentAlignment = Alignment.BottomEnd) {
                 if (rutaPerfil.isNotEmpty() && File(rutaPerfil).exists()) {
                     AsyncImage(
-                        model = ImageRequest.Builder(context).data(rutaPerfil).build(),
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(CircleShape)
+                        model = ImageRequest.Builder(ctx).data(rutaPerfil).crossfade(true).build(),
+                        contentDescription = "Foto",
+                        modifier = Modifier.size(140.dp).clip(CircleShape)
                     )
                 } else {
-                    Icon(
-                        Icons.Filled.AccountCircle,
-                        "Sin foto",
-                        modifier = Modifier.size(140.dp),
-                        tint = Color.Gray
-                    )
+                    Icon(Icons.Filled.AccountCircle, "Sin foto", Modifier.size(140.dp), tint = Color.Gray)
                 }
                 SmallFloatingActionButton(
                     onClick = { galleryLauncher.launch("image/*") },
                     containerColor = Color(0xFF3F51B5),
                     modifier = Modifier.size(45.dp)
-                ) {
-                    Icon(Icons.Filled.CameraAlt, "Cambiar foto", tint = Color.White, modifier = Modifier.size(22.dp))
-                }
+                ) { Icon(Icons.Filled.CameraAlt, "Cambiar", tint = Color.White, modifier = Modifier.size(22.dp)) }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // Campos del perfil
             PerfilItem("Alias", alias, Icons.Filled.Badge) { onNavigateToEditPerfil("alias") }
             PerfilItem("Correo", correo, Icons.Filled.AlternateEmail) {}
             PerfilItem("Información", info, Icons.Filled.Info) { onNavigateToEditPerfil("info") }
@@ -133,25 +115,12 @@ fun ViewYouPerfilScreen(
 }
 
 @Composable
-private fun PerfilItem(
-    label: String,
-    value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
+private fun PerfilItem(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable(onClick = onClick),
+        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onClick),
         color = Color.White
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, null, Modifier.size(40.dp), tint = Color.DarkGray)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
