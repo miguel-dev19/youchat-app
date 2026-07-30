@@ -68,7 +68,7 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
                 File(YouChatApplication.RUTA_IMAGENES_PERFIL).mkdirs()
                 context.contentResolver.openInputStream(it)?.use { input -> FileOutputStream(File(miPath)).use { output -> input.copyTo(output) } }
                 rutaImagenPerfil = miPath
-                YouChatApplication.setRuta_img_perfil(miPath)
+                YouChatApplication.ruta_img_perfil = miPath
             } catch (_: Exception) {}
         }
     }
@@ -132,9 +132,9 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         topBar = { TopAppBar(title = { Text("Editar perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBtn, titleContentColor = Color.White)) },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                YouChatApplication.setAlias(alias)
+                YouChatApplication.alias = alias
                 when (configSeleccionada) { 1 -> YouChatApplication.configuracion1(); 2 -> YouChatApplication.configuracion2(); 3 -> YouChatApplication.configuracion3() }
-                YouChatApplication.setMark(3); onContinuar()
+                YouChatApplication.mark = 3; onContinuar()
             }, containerColor = colorBtn) { Icon(Icons.Filled.Check, "Continuar", tint = Color.White) }
         }
     ) { padding ->
