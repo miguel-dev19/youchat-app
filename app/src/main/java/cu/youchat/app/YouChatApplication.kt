@@ -21,6 +21,9 @@ class YouChatApplication : Application() {
         @JvmStatic val RUTA_IMAGENES_PERFIL = Environment.getExternalStorageDirectory().toString() + "/YouChat/.Imágenes de prefil/"
         @JvmStatic val RUTA_COPIA_BASE_DATOS = Environment.getExternalStorageDirectory().toString() + "/YouChat/"
 
+        fun setAlias(a: String?) { alias = a }
+        fun setRuta_img_perfil(r: String?) { ruta_img_perfil = r }
+        fun setMark(m: Int) { mark = m }
         fun configuracion1() {}
         fun configuracion2() {}
         fun configuracion3() {}
