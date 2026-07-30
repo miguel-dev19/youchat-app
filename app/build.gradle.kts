@@ -20,6 +20,11 @@ android {
     composeOptions { kotlinCompilerExtensionVersion = "1.5.5" }
 
     compileOptions {
+    packaging {
+        resources {
+            excludes += setOf("META-INF/NOTICE.md", "META-INF/LICENSE.md")
+        }
+    }
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
