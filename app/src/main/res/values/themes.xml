@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.YouChat.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/iconyc8</item>
+        <item name="postSplashScreenTheme">@style/Theme.YouChat</item>
+    </style>
+    <style name="Theme.YouChat" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+</resources>
