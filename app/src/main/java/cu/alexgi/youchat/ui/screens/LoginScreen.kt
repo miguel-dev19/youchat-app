@@ -1,9 +1,5 @@
 package cu.alexgi.youchat.ui.screens
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,26 +48,12 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
-    val activity = context as? Activity
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    // Selector de cuenta Google
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val accountName = data?.getStringExtra("authAccount") ?: ""
-            if (accountName.isNotEmpty()) {
-                email = accountName
-            }
-        }
-    }
 
     val colorTema = Color(0xFF3F51B5)
     val lottieComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.aasend_e_mail_egpid))
@@ -90,16 +71,14 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
         val pass = password.trim()
         when {
             correo.isEmpty() -> { mostrarError("El correo no puede estar vacío"); return }
-            !correo.endsWith("@nauta.cu") && !correo.endsWith("@gmail.com") -> {
-                mostrarError("Debe ser un correo Nauta o Gmail"); return
-            }
+            !correo.endsWith("@nauta.cu") -> { mostrarError("Debe ser un correo Nauta (@nauta.cu)"); return }
             pass.isEmpty() -> { mostrarError("La contraseña no puede estar vacía"); return }
         }
         focusManager.clearFocus()
         isLoading = true
         scope.launch {
             try {
-                val exito = verificarCorreo(correo, pass)
+                val exito = verificarCorreoNauta(correo, pass)
                 if (exito) {
                     YouChatApplication.correo = correo
                     YouChatApplication.pass = pass
@@ -114,45 +93,29 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
         }
     }
 
-    fun abrirSelectorGoogle() {
-        val intent = android.accounts.AccountManager.newChooseAccountIntent(
-            null, null, arrayOf("com.google"), null, null, null, null
-        )
-        googleSignInLauncher.launch(intent)
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFEDF2F8))
-    ) {
+    Box(Modifier.fillMaxSize().background(Color(0xFFEDF2F8))) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo
             AnimatedVisibility(visible = !isLoading, enter = fadeIn() + scaleIn(), exit = fadeOut() + scaleOut()) {
                 Icon(painterResource(R.drawable.iconycvector9), "YouChat", Modifier.size(130.dp), tint = Color.Unspecified)
             }
             Spacer(Modifier.height(24.dp))
-
-            // Campos
             AnimatedVisibility(visible = !isLoading, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Correo
                     OutlinedTextField(
                         value = email, onValueChange = { email = it },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("Correo") },
                         leadingIcon = { Icon(Icons.Filled.Person, "Correo", tint = Color.Black) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(50),
+                        singleLine = true, shape = RoundedCornerShape(50),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                         keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = colorTema, unfocusedBorderColor = Color(0xFF6B6B6B), cursorColor = Color.Black)
                     )
                     Spacer(Modifier.height(12.dp))
-
-                    // Contraseña
                     OutlinedTextField(
                         value = password, onValueChange = { password = it },
                         modifier = Modifier.fillMaxWidth(),
@@ -171,56 +134,19 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = colorTema, unfocusedBorderColor = Color(0xFF6B6B6B), cursorColor = Color.Black)
                     )
                     Spacer(Modifier.height(20.dp))
-
-                    // Botón Autenticar
                     Button(
                         onClick = { intentarLogin() },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(containerColor = colorTema),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                    ) {
-                        Text("Autenticar", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-
-                    // Separador "o"
-                    Spacer(Modifier.height(20.dp))
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        HorizontalDivider(Modifier.weight(1f), thickness = 1.dp, color = Color(0xFFBDBDBD))
-                        Text("  o  ", color = Color(0xFF757575), fontSize = 14.sp)
-                        HorizontalDivider(Modifier.weight(1f), thickness = 1.dp, color = Color(0xFFBDBDBD))
-                    }
-                    Spacer(Modifier.height(20.dp))
-
-                    // Botón Google
-                    OutlinedButton(
-                        onClick = { abrirSelectorGoogle() },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(50),
-                        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF4285F4))
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
-                            contentDescription = "Google",
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.Unspecified
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Iniciar sesión con Google", color = Color(0xFF757575), fontSize = 14.sp)
-                    }
+                    ) { Text("Autenticar", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) }
                 }
             }
-
-            // Animación de carga
             AnimatedVisibility(visible = isLoading, enter = fadeIn(animationSpec = tween(300)), exit = fadeOut()) {
                 LottieAnimation(composition = lottieComposition, progress = { lottieProgress }, modifier = Modifier.size(220.dp))
             }
         }
-
-        // Error snackbar
         AnimatedVisibility(
             visible = errorMessage != null,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -228,11 +154,7 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             errorMessage?.let { mensaje ->
-                Card(
-                    Modifier.fillMaxWidth().padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
+                Card(Modifier.fillMaxWidth().padding(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), shape = RoundedCornerShape(12.dp)) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Info, null, tint = MaterialTheme.colorScheme.onErrorContainer)
                         Spacer(Modifier.width(8.dp))
@@ -245,24 +167,15 @@ fun LoginScreen(onLoginExitoso: () -> Unit) {
     }
 }
 
-private suspend fun verificarCorreo(correo: String, pass: String): Boolean = withContext(Dispatchers.IO) {
+private suspend fun verificarCorreoNauta(correo: String, pass: String): Boolean = withContext(Dispatchers.IO) {
     try {
-        val props = Properties()
-        if (correo.endsWith("@nauta.cu")) {
-            props.put("mail.smtp.host", "smtp.nauta.cu")
-            props.put("mail.smtp.auth", "true")
-            props.put("mail.smtp.port", "25")
-        } else {
-            props.put("mail.smtp.host", "smtp.gmail.com")
-            props.put("mail.smtp.starttls.enable", "true")
-            props.put("mail.smtp.auth", "true")
-            props.put("mail.smtp.port", "587")
+        val props = Properties().apply {
+            put("mail.smtp.host", "smtp.nauta.cu"); put("mail.smtp.auth", "true"); put("mail.smtp.port", "25")
         }
         val session = Session.getDefaultInstance(props, object : Authenticator() {
             override fun getPasswordAuthentication() = PasswordAuthentication(correo, pass)
         })
-        val transport = SMTPTransport(session, javax.mail.URLName("smtp", props.getProperty("mail.smtp.host"),
-            props.getProperty("mail.smtp.port").toInt(), null, correo, pass))
+        val transport = SMTPTransport(session, javax.mail.URLName("smtp", "smtp.nauta.cu", 25, null, correo, pass))
         if (!transport.isConnected) transport.connect()
         transport.isConnected
     } catch (e: Exception) { false }
