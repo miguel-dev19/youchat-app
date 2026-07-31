@@ -5,5 +5,6 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/iconyc8</item>
         <item name="postSplashScreenTheme">@style/Theme.YouChat</item>
     </style>
-    <style name="Theme.YouChat" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+    
+    <style name="Theme.YouChat" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
