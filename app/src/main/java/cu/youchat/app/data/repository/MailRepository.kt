@@ -2,8 +2,6 @@ package cu.youchat.app.data.repository
 
 import cu.youchat.app.data.local.dao.ChatDao
 import cu.youchat.app.data.local.dao.UsuarioDao
-import cu.youchat.app.data.local.entity.ChatEntity
-import cu.youchat.app.data.local.entity.UsuarioEntity
 import cu.youchat.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -11,7 +9,11 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.mail.*
+import javax.mail.Authenticator
+import javax.mail.Message
+import javax.mail.PasswordAuthentication
+import javax.mail.Session
+import javax.mail.Transport
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
@@ -21,7 +23,6 @@ class MailRepository @Inject constructor(
     private val chatDao: ChatDao,
     private val usuarioDao: UsuarioDao
 ) {
-    
     suspend fun verificarCredenciales(correo: String, pass: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val props = Properties().apply {
@@ -55,7 +56,7 @@ class MailRepository @Inject constructor(
             val message = MimeMessage(session).apply {
                 setFrom(InternetAddress(correo))
                 addRecipient(Message.RecipientType.TO, InternetAddress(destinatario))
-                this.subject = asunto
+                subject = asunto
                 setText(mensaje)
             }
             Transport.send(message)

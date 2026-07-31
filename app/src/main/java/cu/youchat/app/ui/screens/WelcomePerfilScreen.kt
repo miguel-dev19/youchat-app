@@ -37,17 +37,17 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.mail.*
-import com.sun.mail.imap.IMAPFolder
-import com.sun.mail.imap.IMAPStore
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomePerfilScreen(onContinuar: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var alias by remember { mutableStateOf(YouChatApplication.alias ?: "") }
-    var rutaImagenPerfil by remember { mutableStateOf(YouChatApplication.ruta_img_perfil ?: "") }
+    var alias by remember { mutableStateOf("Usuario" ?: "") }
+    var rutaImagenPerfil by remember { mutableStateOf("" ?: "") }
     var configSeleccionada by remember { mutableIntStateOf(2) }
     var verificandoBD by remember { mutableStateOf(false) }
     var hayCopiaSeguridad by remember { mutableStateOf<Boolean?>(null) }
@@ -63,12 +63,12 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         uri?.let {
             try {
                 val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-                val nombreImg = (YouChatApplication.correo ?: "user").replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
-                val miPath = YouChatApplication.RUTA_IMAGENES_PERFIL + nombreImg
-                File(YouChatApplication.RUTA_IMAGENES_PERFIL).mkdirs()
+                val nombreImg = ("" ?: "user").replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
+                val miPath = "/YouChat/.Imagenes de perfil/" + nombreImg
+                File("/YouChat/.Imagenes de perfil/").mkdirs()
                 context.contentResolver.openInputStream(it)?.use { input -> FileOutputStream(File(miPath)).use { output -> input.copyTo(output) } }
                 rutaImagenPerfil = miPath
-                YouChatApplication.ruta_img_perfil = miPath
+                "" = miPath
             } catch (_: Exception) {}
         }
     }
@@ -84,7 +84,7 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         scope.launch {
             verificandoBD = true; hayCopiaSeguridad = null
             withContext(Dispatchers.IO) {
-                val sd = File(YouChatApplication.RUTA_COPIA_BASE_DATOS)
+                val sd = File("/YouChat/")
                 if (!sd.exists()) sd.mkdirs()
                 val backupDB = File(sd, "YouChat_BDatos.dbyc")
                 hayCopiaSeguridad = backupDB.exists()
@@ -133,7 +133,7 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 preferences.setAlias(alias)
-                when (configSeleccionada) { 1 -> YouChatApplication.configuracion1(); 2 -> YouChatApplication.configuracion2(); 3 -> YouChatApplication.configuracion3() }
+                // Configuracion: $configSeleccionada
                 // mark se actualiza en NavHost onContinuar()
             }, containerColor = colorBtn) { Icon(Icons.Filled.Check, "Continuar", tint = Color.White) }
         }
@@ -202,8 +202,8 @@ private fun RadioButtonItem(texto: String, seleccionado: Boolean, onClick: () ->
 private suspend fun analizarBandeja(): Pair<Int, Long>? = withContext(Dispatchers.IO) {
     try {
         val props = Properties().apply { setProperty("mail.store.protocol", "imap"); setProperty("mail.imap.host", "imap.nauta.cu"); setProperty("mail.imap.port", "143") }
-        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass) })
-        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
+        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication("", YouChatApplication.pass) })
+        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", "", YouChatApplication.pass)
         if (store.isConnected) { val inbox = store.getFolder("Inbox") as IMAPFolder; inbox.open(Folder.READ_WRITE); if (inbox.isOpen) { val messages = inbox.getMessages(); val cant = messages.size; var peso = 0L; for (msg in messages) peso += msg.size; inbox.close(false); store.close(); return@withContext Pair(cant, peso) }; store.close() }
     } catch (_: Exception) {}
     null
@@ -212,8 +212,8 @@ private suspend fun analizarBandeja(): Pair<Int, Long>? = withContext(Dispatcher
 private suspend fun vaciarBandejaIMAP() = withContext(Dispatchers.IO) {
     try {
         val props = Properties().apply { setProperty("mail.store.protocol", "imap"); setProperty("mail.imap.host", "imap.nauta.cu"); setProperty("mail.imap.port", "143") }
-        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication(YouChatApplication.correo, YouChatApplication.pass) })
-        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", YouChatApplication.correo, YouChatApplication.pass)
+        val session = Session.getDefaultInstance(props, object : Authenticator() { override fun getPasswordAuthentication() = PasswordAuthentication("", YouChatApplication.pass) })
+        val store = session.getStore("imap") as IMAPStore; store.connect("imap.nauta.cu", "", YouChatApplication.pass)
         if (store.isConnected) { val inbox = store.getFolder("Inbox") as IMAPFolder; inbox.open(Folder.READ_WRITE); if (inbox.isOpen) { for (msg in inbox.getMessages()) msg.setFlag(Flags.Flag.DELETED, true); inbox.close(true); store.close() } }
     } catch (_: Exception) {}
 }

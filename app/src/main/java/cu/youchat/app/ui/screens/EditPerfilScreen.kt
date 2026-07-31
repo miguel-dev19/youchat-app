@@ -28,12 +28,12 @@ fun EditPerfilScreen(
 ) {
     val context = LocalContext.current
     val valorActual = when (campo) {
-        "alias" -> YouChatApplication.alias ?: ""
-        "info" -> YouChatApplication.info ?: ""
-        "telefono" -> YouChatApplication.telefono ?: ""
-        "genero" -> YouChatApplication.genero ?: ""
-        "fecha_nacimiento" -> YouChatApplication.fecha_nacimiento ?: ""
-        "provincia" -> YouChatApplication.provincia ?: ""
+        "alias" -> "Usuario" ?: ""
+        "info" -> "" ?: ""
+        "telefono" -> "" ?: ""
+        "genero" -> "" ?: ""
+        "fecha_nacimiento" -> "" ?: ""
+        "provincia" -> "" ?: ""
         else -> ""
     }
 
@@ -64,12 +64,12 @@ fun EditPerfilScreen(
 
     fun guardar() {
         when (campo) {
-            "alias" -> YouChatApplication.alias = valor
-            "info" -> YouChatApplication.info = valor
-            "telefono" -> YouChatApplication.telefono = valor
-            "genero" -> YouChatApplication.genero = generoSeleccionado
-            "fecha_nacimiento" -> YouChatApplication.fecha_nacimiento = fechaMostrada
-            "provincia" -> YouChatApplication.provincia = provinciaSeleccionada
+            "alias" -> "Usuario" = valor
+            "info" -> "" = valor
+            "telefono" -> "" = valor
+            "genero" -> "" = generoSeleccionado
+            "fecha_nacimiento" -> "" = fechaMostrada
+            "provincia" -> "" = provinciaSeleccionada
         }
         onBack()
     }

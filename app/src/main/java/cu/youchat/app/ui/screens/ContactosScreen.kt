@@ -140,8 +140,8 @@ fun ContactosScreen(
             // Menú desplegable
             AnimatedVisibility(
                 visible = showMenu,
-                enter = fadeIn() + scaleIn(transformOrigin = TransformOrigin(1f, 0f)),
-                exit = fadeOut() + scaleOut(transformOrigin = TransformOrigin(1f, 0f)),
+                enter = fadeIn() + scaleIn(transformOrigin = androidx.compose.animation.core.TransformOrigin(1f, 0f)),
+                exit = fadeOut() + scaleOut(transformOrigin = androidx.compose.animation.core.TransformOrigin(1f, 0f)),
                 modifier = Modifier.align(Alignment.TopEnd)
             ) {
                 Card(

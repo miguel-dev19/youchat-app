@@ -36,14 +36,14 @@ fun ViewYouPerfilScreen(
     onNavigateToEditPerfil: (campo: String) -> Unit = {}
 ) {
     val ctx = LocalContext.current
-    val alias = YouChatApplication.alias ?: ""
-    val correo = YouChatApplication.correo ?: ""
-    val info = YouChatApplication.info ?: ""
-    val telefono = YouChatApplication.telefono ?: ""
-    val genero = YouChatApplication.genero ?: ""
-    val provincia = YouChatApplication.provincia ?: ""
-    val fechaNacimiento = YouChatApplication.fecha_nacimiento ?: ""
-    var rutaPerfil by remember { mutableStateOf(YouChatApplication.ruta_img_perfil ?: "") }
+    val alias = "Usuario" ?: ""
+    val correo = "" ?: ""
+    val info = "" ?: ""
+    val telefono = "" ?: ""
+    val genero = "" ?: ""
+    val provincia = "" ?: ""
+    val fechaNacimiento = "" ?: ""
+    var rutaPerfil by remember { mutableStateOf("" ?: "") }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -52,13 +52,13 @@ fun ViewYouPerfilScreen(
             try {
                 val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
                 val nombreImg = correo.replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
-                val miPath = YouChatApplication.RUTA_IMAGENES_PERFIL + nombreImg
-                File(YouChatApplication.RUTA_IMAGENES_PERFIL).mkdirs()
+                val miPath = "/YouChat/.Imagenes de perfil/" + nombreImg
+                File("/YouChat/.Imagenes de perfil/").mkdirs()
                 ctx.contentResolver.openInputStream(it)?.use { input ->
                     FileOutputStream(File(miPath)).use { output -> input.copyTo(output) }
                 }
                 rutaPerfil = miPath
-                YouChatApplication.ruta_img_perfil = miPath
+                "" = miPath
             } catch (_: Exception) {}
         }
     }
