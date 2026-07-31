@@ -1,37 +1,38 @@
 package cu.youchat.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import cu.youchat.app.YouChatApplication
+import androidx.navigation.navArgument
+import cu.youchat.app.MainViewModel
 import cu.youchat.app.ui.screens.*
 
 @Composable
 fun YouChatNavHost(navController: NavHostController) {
-    NavHost(
-        navController = navController,
-        startDestination = when (YouChatApplication.mark) {
-            0 -> Rutas.ONBOARDING
-            1 -> Rutas.LOGIN
-            2 -> Rutas.WELCOME_PERFIL
-            else -> Rutas.PRINCIPAL
-        }
-    ) {
+    val viewModel: MainViewModel = hiltViewModel()
+    val startDest by viewModel.startDestination.collectAsState()
+
+    NavHost(navController = navController, startDestination = startDest) {
         composable(Rutas.ONBOARDING) {
             OnboardingScreen(onFinalizar = {
-                YouChatApplication.mark = 1
+                viewModel.setOnboardingComplete()
                 navController.navigate(Rutas.LOGIN) { popUpTo(Rutas.ONBOARDING) { inclusive = true } }
             })
         }
         composable(Rutas.LOGIN) {
             LoginScreen(onLoginExitoso = {
+                viewModel.setLoginComplete()
                 navController.navigate(Rutas.WELCOME_PERFIL) { popUpTo(Rutas.LOGIN) { inclusive = true } }
             })
         }
         composable(Rutas.WELCOME_PERFIL) {
             WelcomePerfilScreen(onContinuar = {
-                YouChatApplication.mark = 3
+                viewModel.setWelcomeComplete()
                 navController.navigate(Rutas.PRINCIPAL) { popUpTo(Rutas.WELCOME_PERFIL) { inclusive = true } }
             })
         }
@@ -43,14 +44,17 @@ fun YouChatNavHost(navController: NavHostController) {
             )
         }
         composable(Rutas.VIEW_YOU_PERFIL) {
+            ViewYouPerfilScreen(onBack = { navController.popBackStack() }, onNavigateToEditPerfil = { campo -> navController.navigate(Rutas.editPerfil(campo)) })
+        }
         composable(Rutas.CONTACTOS) {
-        composable(Rutas.EDIT_PERFIL) { backStackEntry ->
+            ContactosScreen(
+                onBack = { navController.popBackStack() },
+                onContactoSeleccionado = { _, _ -> }
+            )
+        }
+        composable(Rutas.EDIT_PERFIL, arguments = listOf(navArgument("campo") { type = NavType.StringType })) { backStackEntry ->
             val campo = backStackEntry.arguments?.getString("campo") ?: "alias"
             EditPerfilScreen(campo = campo, onBack = { navController.popBackStack() })
-        }
-            ContactosScreen(onBack = { navController.popBackStack() })
-        }
-            ViewYouPerfilScreen(onBack = { navController.popBackStack() })
         }
     }
 }

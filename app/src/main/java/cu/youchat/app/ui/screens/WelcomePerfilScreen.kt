@@ -132,9 +132,9 @@ fun WelcomePerfilScreen(onContinuar: () -> Unit) {
         topBar = { TopAppBar(title = { Text("Editar perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = colorBtn, titleContentColor = Color.White)) },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                YouChatApplication.alias = alias
+                preferences.setAlias(alias)
                 when (configSeleccionada) { 1 -> YouChatApplication.configuracion1(); 2 -> YouChatApplication.configuracion2(); 3 -> YouChatApplication.configuracion3() }
-                YouChatApplication.mark = 3; onContinuar()
+                // mark se actualiza en NavHost onContinuar()
             }, containerColor = colorBtn) { Icon(Icons.Filled.Check, "Continuar", tint = Color.White) }
         }
     ) { padding ->
