@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import cu.youchat.app.YouChatApplication
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -36,29 +35,26 @@ fun ViewYouPerfilScreen(
     onNavigateToEditPerfil: (campo: String) -> Unit = {}
 ) {
     val ctx = LocalContext.current
-    val alias = "Usuario" ?: ""
-    val correo = "" ?: ""
-    val info = "" ?: ""
-    val telefono = "" ?: ""
-    val genero = "" ?: ""
-    val provincia = "" ?: ""
-    val fechaNacimiento = "" ?: ""
-    var rutaPerfil by remember { mutableStateOf("" ?: "") }
+    var alias by remember { mutableStateOf("Usuario") }
+    var correo by remember { mutableStateOf("") }
+    var info by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var genero by remember { mutableStateOf("") }
+    var provincia by remember { mutableStateOf("") }
+    var fechaNacimiento by remember { mutableStateOf("") }
+    var rutaPerfil by remember { mutableStateOf("") }
 
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    val galleryLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             try {
                 val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
-                val nombreImg = correo.replace(".", "").replace("@", "") + sdf.format(Date()) + ".jpg"
-                val miPath = "/YouChat/.Imagenes de perfil/" + nombreImg
-                File("/YouChat/.Imagenes de perfil/").mkdirs()
+                val nombreImg = "perfil_" + sdf.format(Date()) + ".jpg"
+                val miPath = ctx.filesDir.absolutePath + "/imagenes_perfil/" + nombreImg
+                File(ctx.filesDir.absolutePath + "/imagenes_perfil").mkdirs()
                 ctx.contentResolver.openInputStream(it)?.use { input ->
                     FileOutputStream(File(miPath)).use { output -> input.copyTo(output) }
                 }
                 rutaPerfil = miPath
-                "" = miPath
             } catch (_: Exception) {}
         }
     }
@@ -67,42 +63,21 @@ fun ViewYouPerfilScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Perfil", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, "Atrás")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF3F51B5),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Atrás") } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF3F51B5), titleContentColor = Color.White, navigationIconContentColor = Color.White)
             )
         }
     ) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).background(Color.White).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).background(Color.White).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(contentAlignment = Alignment.BottomEnd) {
                 if (rutaPerfil.isNotEmpty() && File(rutaPerfil).exists()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(ctx).data(rutaPerfil).crossfade(true).build(),
-                        contentDescription = "Foto",
-                        modifier = Modifier.size(140.dp).clip(CircleShape)
-                    )
+                    AsyncImage(model = ImageRequest.Builder(ctx).data(rutaPerfil).crossfade(true).build(), contentDescription = "Foto", modifier = Modifier.size(140.dp).clip(CircleShape))
                 } else {
                     Icon(Icons.Filled.AccountCircle, "Sin foto", Modifier.size(140.dp), tint = Color.Gray)
                 }
-                SmallFloatingActionButton(
-                    onClick = { galleryLauncher.launch("image/*") },
-                    containerColor = Color(0xFF3F51B5),
-                    modifier = Modifier.size(45.dp)
-                ) { Icon(Icons.Filled.CameraAlt, "Cambiar", tint = Color.White, modifier = Modifier.size(22.dp)) }
+                SmallFloatingActionButton(onClick = { galleryLauncher.launch("image/*") }, containerColor = Color(0xFF3F51B5), modifier = Modifier.size(45.dp)) { Icon(Icons.Filled.CameraAlt, "Cambiar", tint = Color.White, modifier = Modifier.size(22.dp)) }
             }
-
             Spacer(Modifier.height(16.dp))
-
             PerfilItem("Alias", alias, Icons.Filled.Badge) { onNavigateToEditPerfil("alias") }
             PerfilItem("Correo", correo, Icons.Filled.AlternateEmail) {}
             PerfilItem("Información", info, Icons.Filled.Info) { onNavigateToEditPerfil("info") }
@@ -116,10 +91,7 @@ fun ViewYouPerfilScreen(
 
 @Composable
 private fun PerfilItem(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
-    Surface(
-        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onClick),
-        color = Color.White
-    ) {
+    Surface(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onClick), color = Color.White) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, null, Modifier.size(40.dp), tint = Color.DarkGray)
             Spacer(Modifier.width(12.dp))
