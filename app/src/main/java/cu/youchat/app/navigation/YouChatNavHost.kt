@@ -44,6 +44,10 @@ fun YouChatNavHost(navController: NavHostController) {
         }
         composable(Rutas.VIEW_YOU_PERFIL) {
         composable(Rutas.CONTACTOS) {
+        composable(Rutas.EDIT_PERFIL) { backStackEntry ->
+            val campo = backStackEntry.arguments?.getString("campo") ?: "alias"
+            EditPerfilScreen(campo = campo, onBack = { navController.popBackStack() })
+        }
             ContactosScreen(onBack = { navController.popBackStack() })
         }
             ViewYouPerfilScreen(onBack = { navController.popBackStack() })

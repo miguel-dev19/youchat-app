@@ -6,4 +6,5 @@ object Rutas {
     const val PRINCIPAL = "principal"
     const val VIEW_YOU_PERFIL = "view_you_perfil"
     const val CONTACTOS = "contactos"
+    const val EDIT_PERFIL = "edit_perfil/{campo}"
 }
