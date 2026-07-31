@@ -39,10 +39,13 @@ fun YouChatNavHost(navController: NavHostController) {
             PrincipalScreen(
                 onNavigateToChat = { _, _ -> },
                 onNavigateToPerfil = { navController.navigate(Rutas.VIEW_YOU_PERFIL) },
-                onNavigateToContactos = { }
+                onNavigateToContactos = { navController.navigate(Rutas.CONTACTOS) }
             )
         }
         composable(Rutas.VIEW_YOU_PERFIL) {
+        composable(Rutas.CONTACTOS) {
+            ContactosScreen(onBack = { navController.popBackStack() })
+        }
             ViewYouPerfilScreen(onBack = { navController.popBackStack() })
         }
     }
